@@ -69,15 +69,15 @@ class HomeScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 100, // 80에서 100으로 증가
-            height: 100, // 80에서 100으로 증가
+            width: 100,
+            height: 100,
             decoration: BoxDecoration(
               color: Color(0xFFF1F8E9),
-              borderRadius: BorderRadius.circular(50), // 40에서 50으로 증가
+              borderRadius: BorderRadius.circular(50),
             ),
             child: Icon(
               Icons.eco_outlined,
-              size: 50, // 40에서 50으로 증가
+              size: 50,
               color: Color(0xFF66BB6A),
             ),
           ),
@@ -87,7 +87,7 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF333333),
+              color: Theme.of(context).colorScheme.onSurface, // 테마 기반 색상으로 변경
             ),
             textAlign: TextAlign.center,
           ),
@@ -96,7 +96,7 @@ class HomeScreen extends StatelessWidget {
             '내 식물을 등록해볼까요?',
             style: TextStyle(
               fontSize: 14,
-              color: Color(0xFF666666),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6), // 테마 기반 색상으로 변경
               fontWeight: FontWeight.w400,
             ),
             textAlign: TextAlign.center,
@@ -163,7 +163,7 @@ class HomeScreen extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF333333),
+                            color: Theme.of(context).colorScheme.onSurface, // 하드코딩 색상을 테마 기반으로 변경
                           ),
                         ),
                         SizedBox(height: 4),
@@ -171,22 +171,22 @@ class HomeScreen extends StatelessWidget {
                           plant.species,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Color(0xFF666666),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6), // 하드코딩 색상을 테마 기반으로 변경
                             fontWeight: FontWeight.w400,
                           ),
                         ),
                       ],
                     ),
                     Container(
-                      width: 56, // 48에서 56으로 증가
-                      height: 56, // 48에서 56으로 증가
+                      width: 56,
+                      height: 56,
                       decoration: BoxDecoration(
                         color: Color(0xFFF1F8E9),
-                        borderRadius: BorderRadius.circular(28), // 24에서 28로 증가
+                        borderRadius: BorderRadius.circular(28),
                       ),
                       child: Icon(
                         Icons.eco_outlined,
-                        size: 32, // 28에서 32로 증가
+                        size: 32,
                         color: Color(0xFF66BB6A),
                       ),
                     ),
@@ -212,7 +212,7 @@ class HomeScreen extends StatelessWidget {
                       '내 식물 상태',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF666666),
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6), // 하드코딩 색상을 테마 기반으로 변경
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -305,8 +305,6 @@ class HomeScreen extends StatelessWidget {
         ),
 
         SizedBox(height: 16),
-
-        // 상태 카드는 이제 식물 정보 카드에 통합되었으므로 제거
       ],
     );
   }
@@ -325,9 +323,9 @@ class HomeScreen extends StatelessWidget {
     try {
       DateTime registered = DateTime.parse(registeredDate);
       DateTime now = DateTime.now();
-      return now.difference(registered).inDays + 1; // +1을 해서 등록일도 1일째로 계산
+      return now.difference(registered).inDays + 1;
     } catch (e) {
-      return 1; // 파싱 실패 시 기본값
+      return 1;
     }
   }
 }
