@@ -182,7 +182,7 @@ class _PlantSettingsDialogState extends State<PlantSettingsDialog> {
                         _buildSliderSection(
                           '온도 (°C)',
                           '${_tempSettings['optimalTempMin']!.toInt()}°C - ${_tempSettings['optimalTempMax']!.toInt()}°C',
-                          10, 35,
+                          5, 40, // 범위 확장: 5°C ~ 40°C
                           _tempSettings['optimalTempMin']!,
                           _tempSettings['optimalTempMax']!,
                               (minVal, maxVal) {
@@ -196,7 +196,7 @@ class _PlantSettingsDialogState extends State<PlantSettingsDialog> {
                         _buildSliderSection(
                           '습도 (%)',
                           '${_tempSettings['optimalHumidityMin']!.toInt()}% - ${_tempSettings['optimalHumidityMax']!.toInt()}%',
-                          20, 90,
+                          10, 95, // 범위 확장: 10% ~ 95%
                           _tempSettings['optimalHumidityMin']!,
                           _tempSettings['optimalHumidityMax']!,
                               (minVal, maxVal) {
@@ -210,7 +210,7 @@ class _PlantSettingsDialogState extends State<PlantSettingsDialog> {
                         _buildSliderSection(
                           '토양 수분 (%)',
                           '${_tempSettings['optimalSoilMoistureMin']!.toInt()}% - ${_tempSettings['optimalSoilMoistureMax']!.toInt()}%',
-                          10, 90,
+                          5, 95, // 범위 확장: 5% ~ 95%
                           _tempSettings['optimalSoilMoistureMin']!,
                           _tempSettings['optimalSoilMoistureMax']!,
                               (minVal, maxVal) {
@@ -224,7 +224,7 @@ class _PlantSettingsDialogState extends State<PlantSettingsDialog> {
                         _buildSliderSection(
                           '조도 (%)',
                           '${_tempSettings['optimalLightMin']!.toInt()}% - ${_tempSettings['optimalLightMax']!.toInt()}%',
-                          30, 100,
+                          10, 100, // 범위 확장: 10% ~ 100%
                           _tempSettings['optimalLightMin']!,
                           _tempSettings['optimalLightMax']!,
                               (minVal, maxVal) {
@@ -302,6 +302,15 @@ class _PlantSettingsDialogState extends State<PlantSettingsDialog> {
       IconData icon,
       Color color,
       ) {
+    // 값이 범위를 벗어나는 경우 안전하게 clamp 처리
+    double safeMinValue = minValue.clamp(min, max);
+    double safeMaxValue = maxValue.clamp(min, max);
+
+    // min값이 max값보다 큰 경우 처리
+    if (safeMinValue > safeMaxValue) {
+      safeMinValue = safeMaxValue;
+    }
+
     return Container(
       margin: EdgeInsets.only(bottom: 24),
       padding: EdgeInsets.all(16),
@@ -351,19 +360,19 @@ class _PlantSettingsDialogState extends State<PlantSettingsDialog> {
 
           // 최소값 슬라이더
           Text(
-            '최소값: ${minValue.toInt()}',
+            '최소값: ${safeMinValue.toInt()}',
             style: TextStyle(fontSize: 12, color: Colors.grey[600]),
           ),
           Slider(
-            value: minValue,
+            value: safeMinValue,
             min: min,
             max: max,
             divisions: (max - min).toInt(),
             activeColor: color,
             inactiveColor: color.withOpacity(0.3),
             onChanged: (value) {
-              if (value < maxValue) {
-                onChanged(value, maxValue);
+              if (value <= safeMaxValue) {
+                onChanged(value, safeMaxValue);
               }
             },
           ),
@@ -372,19 +381,19 @@ class _PlantSettingsDialogState extends State<PlantSettingsDialog> {
 
           // 최대값 슬라이더
           Text(
-            '최대값: ${maxValue.toInt()}',
+            '최대값: ${safeMaxValue.toInt()}',
             style: TextStyle(fontSize: 12, color: Colors.grey[600]),
           ),
           Slider(
-            value: maxValue,
+            value: safeMaxValue,
             min: min,
             max: max,
             divisions: (max - min).toInt(),
             activeColor: color,
             inactiveColor: color.withOpacity(0.3),
             onChanged: (value) {
-              if (value > minValue) {
-                onChanged(minValue, value);
+              if (value >= safeMinValue) {
+                onChanged(safeMinValue, value);
               }
             },
           ),

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:convert';
 import 'dart:math';
 
@@ -209,7 +208,7 @@ class ApiService {
       userId: 'demo_user',
       pushNotificationEnabled: true,
       language: 'ko',
-      theme: 'system', // 기본값을 system으로 변경
+      theme: 'system',
     );
 
     return _userSettings;
@@ -359,43 +358,6 @@ class ApiService {
         description: '물을 적게 줘도 되는 초보자용 식물',
       ),
     ];
-  }
-
-  // AI 식물 인식 (시뮬레이션)
-  static Future<AIIdentificationResult?> identifyPlant(File imageFile) async {
-    // AI 처리 시뮬레이션
-    await Future.delayed(Duration(milliseconds: 2000 + _random.nextInt(3000)));
-
-    try {
-      // 랜덤하게 식물 선택
-      List<PlantProfile> profiles = await getPlantProfiles();
-      PlantProfile selectedProfile = profiles[_random.nextInt(profiles.length)];
-
-      // 인식 정확도 시뮬레이션
-      double confidence = 0.7 + _random.nextDouble() * 0.25; // 70-95%
-
-      return AIIdentificationResult(
-        species: selectedProfile.species,
-        confidence: confidence,
-        suggestedName: '내 ${selectedProfile.commonName}',
-        optimalSettings: {
-          'optimalTempMin': selectedProfile.optimalTempMin,
-          'optimalTempMax': selectedProfile.optimalTempMax,
-          'optimalHumidityMin': selectedProfile.optimalHumidityMin,
-          'optimalHumidityMax': selectedProfile.optimalHumidityMax,
-          'optimalSoilMoistureMin': selectedProfile.optimalSoilMoistureMin,
-          'optimalSoilMoistureMax': selectedProfile.optimalSoilMoistureMax,
-          'optimalLightMin': selectedProfile.optimalLightMin,
-          'optimalLightMax': selectedProfile.optimalLightMax,
-        },
-      );
-    } catch (e) {
-      // 가끔 인식 실패 시뮬레이션
-      if (_random.nextDouble() < 0.1) {
-        return null;
-      }
-      rethrow;
-    }
   }
 
   // === 헬퍼 메서드들 ===

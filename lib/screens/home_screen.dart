@@ -280,7 +280,7 @@ class HomeScreen extends StatelessWidget {
             SensorCard(
               icon: Icons.opacity_outlined,
               color: Color(0xFF81C784),
-              title: '흙 수분',
+              title: '토양 수분',
               value: '${sensorData.soilMoisture.toStringAsFixed(0)}%',
               optimal: '적정 수분 ${plant.optimalSoilMoistureMin.toInt()}-${plant.optimalSoilMoistureMax.toInt()}%',
               isOptimal: plantProvider.isValueInRange(

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:math';
 
 import '../providers/plant_provider.dart';
 import '../models/app_models.dart';
-import '../services/api_service.dart';
 
 class PlantRegistrationForm extends StatefulWidget {
   @override
@@ -12,10 +10,8 @@ class PlantRegistrationForm extends StatefulWidget {
 }
 
 class _PlantRegistrationFormState extends State<PlantRegistrationForm> {
-  String _registrationMode = 'manual';
   String _plantName = '';
   String _plantSpecies = '';
-  bool _isAIProcessing = false;
   Map<String, double> _optimalSettings = {
     'optimalTempMin': 18,
     'optimalTempMax': 25,
@@ -105,161 +101,6 @@ class _PlantRegistrationFormState extends State<PlantRegistrationForm> {
     }
   }
 
-  Future<void> _handleAIRegistration(BuildContext context) async {
-    setState(() {
-      _isAIProcessing = true;
-    });
-
-    try {
-      // 시뮬레이션: 카메라 촬영과 AI 처리 과정
-      await Future.delayed(Duration(milliseconds: 500));
-
-      // "사진 촬영" 시뮬레이션
-      bool takePhotoConfirmed = await _showTakePhotoDialog(context);
-      if (!takePhotoConfirmed) {
-        setState(() {
-          _isAIProcessing = false;
-        });
-        return;
-      }
-
-      // AI 인식 처리 시뮬레이션
-      await Future.delayed(Duration(milliseconds: 2000 + Random().nextInt(2000)));
-
-      // 랜덤하게 성공/실패 시뮬레이션 (90% 성공률)
-      if (Random().nextDouble() < 0.1) {
-        throw Exception('식물 인식에 실패했습니다. 더 선명한 사진으로 다시 시도해주세요');
-      }
-
-      // 모의 AI 인식 결과 생성
-      final plantProvider = Provider.of<PlantProvider>(context, listen: false);
-      List<PlantProfile> profiles = plantProvider.plantProfiles;
-
-      if (profiles.isEmpty) {
-        throw Exception('식물 데이터베이스를 불러올 수 없습니다');
-      }
-
-      PlantProfile selectedProfile = profiles[Random().nextInt(profiles.length)];
-      double confidence = 0.7 + Random().nextDouble() * 0.25; // 70-95% 정확도
-
-      Plant aiRecognizedPlant = Plant(
-        id: '', // API에서 생성됨
-        name: '내 ${selectedProfile.commonName}',
-        species: selectedProfile.species,
-        registeredDate: DateTime.now().toString().split(' ')[0],
-        optimalTempMin: selectedProfile.optimalTempMin,
-        optimalTempMax: selectedProfile.optimalTempMax,
-        optimalHumidityMin: selectedProfile.optimalHumidityMin,
-        optimalHumidityMax: selectedProfile.optimalHumidityMax,
-        optimalSoilMoistureMin: selectedProfile.optimalSoilMoistureMin,
-        optimalSoilMoistureMax: selectedProfile.optimalSoilMoistureMax,
-        optimalLightMin: selectedProfile.optimalLightMin,
-        optimalLightMax: selectedProfile.optimalLightMax,
-      );
-
-      bool success = await plantProvider.registerPlant(aiRecognizedPlant);
-
-      if (success) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('AI 인식이 완료되었습니다\n${selectedProfile.species} (정확도: ${(confidence * 100).toStringAsFixed(1)}%)'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 4),
-          ),
-        );
-      } else {
-        throw Exception(plantProvider.error ?? '식물 등록에 실패했습니다');
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('AI 인식 실패: $e'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 4),
-        ),
-      );
-    } finally {
-      setState(() {
-        _isAIProcessing = false;
-      });
-    }
-  }
-
-  Future<bool> _showTakePhotoDialog(BuildContext context) async {
-    return await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.camera_alt, color: Colors.green),
-              SizedBox(width: 8),
-              Text('식물 사진 찍기'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 200,
-                height: 150,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey[400]!),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.eco,
-                      size: 60,
-                      color: Colors.green[400],
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      '식물 사진',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                '식물 잎이 잘 보이도록 찍어주세요! AI가 더 정확하게 알아볼 수 있어요',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text('취소'),
-            ),
-            ElevatedButton.icon(
-              onPressed: () => Navigator.of(context).pop(true),
-              icon: Icon(Icons.camera_alt),
-              label: Text('사진 찍기'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
-        );
-      },
-    ) ?? false;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<PlantProvider>(
@@ -308,58 +149,49 @@ class _PlantRegistrationFormState extends State<PlantRegistrationForm> {
                     padding: EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        // 등록 모드 선택
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: (_isAIProcessing || plantProvider.isLoading) ? null : () {
-                                  setState(() {
-                                    _registrationMode = 'ai';
-                                  });
-                                },
-                                icon: Icon(Icons.camera_alt_outlined, size: 18),
-                                label: Text('AI로 찾기'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: _registrationMode == 'ai' ? Color(0xFF4CAF50) : Color(0xFFF5F5F5),
-                                  foregroundColor: _registrationMode == 'ai' ? Colors.white : Color(0xFF666666),
-                                  elevation: 0,
-                                  padding: EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
+                        // 안내 텍스트
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF1F8E9),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Color(0xFF4CAF50).withOpacity(0.3)),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.eco_outlined,
+                                size: 32,
+                                color: Color(0xFF4CAF50),
                               ),
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: (_isAIProcessing || plantProvider.isLoading) ? null : () {
-                                  setState(() {
-                                    _registrationMode = 'manual';
-                                  });
-                                },
-                                icon: Icon(Icons.add, size: 18),
-                                label: Text('직접 등록'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: _registrationMode == 'manual' ? Color(0xFF4CAF50) : Color(0xFFF5F5F5),
-                                  foregroundColor: _registrationMode == 'manual' ? Colors.white : Color(0xFF666666),
-                                  elevation: 0,
-                                  padding: EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
+                              SizedBox(height: 8),
+                              Text(
+                                '새로운 식물 친구를 등록해보세요!',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF2E7D32),
                                 ),
+                                textAlign: TextAlign.center,
                               ),
-                            ),
-                          ],
+                              SizedBox(height: 4),
+                              Text(
+                                '식물 정보를 입력하시면 최적의 환경을 추천해드립니다',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF4CAF50),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
 
                         SizedBox(height: 24),
 
-                        _registrationMode == 'ai'
-                            ? _buildAIRegistration(context)
-                            : _buildManualRegistration(context, plantProvider.plantProfiles),
+                        // 식물 등록 폼
+                        _buildRegistrationForm(context, plantProvider.plantProfiles),
                       ],
                     ),
                   ),
@@ -372,84 +204,17 @@ class _PlantRegistrationFormState extends State<PlantRegistrationForm> {
     );
   }
 
-  Widget _buildAIRegistration(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 60),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Color(0xFFF1F8E9),
-              borderRadius: BorderRadius.circular(40),
-            ),
-            child: _isAIProcessing
-                ? CircularProgressIndicator()
-                : Icon(
-              Icons.photo_camera,
-              size: 40,
-              color: Color(0xFF66BB6A),
-            ),
-          ),
-          SizedBox(height: 24),
-          Text(
-            _isAIProcessing ? 'AI가 식물을 분석하고 있습니다...' : 'AI 식물 인식',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF333333),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 8),
-          Text(
-            _isAIProcessing
-                ? '잠시만 기다려주세요'
-                : '사진을 찍어주시면 AI가 식물을 인식해드립니다',
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFF666666),
-              fontWeight: FontWeight.w400,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: _isAIProcessing ? null : () => _handleAIRegistration(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF4CAF50),
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(
-              _isAIProcessing ? '분석 중...' : '사진 찍기',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildManualRegistration(BuildContext context, List<PlantProfile> plantProfiles) {
+  Widget _buildRegistrationForm(BuildContext context, List<PlantProfile> plantProfiles) {
     return Column(
       children: [
         TextField(
           decoration: InputDecoration(
             labelText: '식물 이름',
             hintText: '예: 우리집 몬스테라',
-            border: OutlineInputBorder(),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            prefixIcon: Icon(Icons.eco_outlined, color: Color(0xFF4CAF50)),
           ),
           onChanged: (value) {
             setState(() {
@@ -463,15 +228,18 @@ class _PlantRegistrationFormState extends State<PlantRegistrationForm> {
         DropdownButtonFormField<String>(
           decoration: InputDecoration(
             labelText: '어떤 식물인가요?',
-            border: OutlineInputBorder(),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            prefixIcon: Icon(Icons.search, color: Color(0xFF4CAF50)),
           ),
           value: _plantSpecies.isEmpty ? null : _plantSpecies,
           menuMaxHeight: 250,
           isExpanded: true,
           icon: Icon(Icons.keyboard_arrow_down),
           style: TextStyle(
-            color: Color(0xFF333333),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 16,
           ),
           onChanged: (String? value) {
@@ -487,7 +255,7 @@ class _PlantRegistrationFormState extends State<PlantRegistrationForm> {
                 child: Text(
                   '선택하세요',
                   style: TextStyle(
-                    color: Color(0xFF999999),
+                    color: Colors.grey[500],
                     fontSize: 16,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -499,7 +267,7 @@ class _PlantRegistrationFormState extends State<PlantRegistrationForm> {
                   child: Text(
                     '${profile.species} (${profile.commonName})',
                     style: TextStyle(
-                      color: Color(0xFF333333),
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
@@ -518,7 +286,7 @@ class _PlantRegistrationFormState extends State<PlantRegistrationForm> {
                 child: Text(
                   '선택하세요',
                   style: TextStyle(
-                    color: Color(0xFF999999),
+                    color: Colors.grey[500],
                     fontSize: 16,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -538,7 +306,7 @@ class _PlantRegistrationFormState extends State<PlantRegistrationForm> {
                       Text(
                         profile.species,
                         style: TextStyle(
-                          color: Color(0xFF333333),
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
@@ -550,7 +318,7 @@ class _PlantRegistrationFormState extends State<PlantRegistrationForm> {
                         Text(
                           profile.commonName,
                           style: TextStyle(
-                            color: Color(0xFF666666),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                             fontSize: 12,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -563,7 +331,7 @@ class _PlantRegistrationFormState extends State<PlantRegistrationForm> {
               );
             }).toList(),
           ],
-          dropdownColor: Colors.white,
+          dropdownColor: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(8),
         ),
 
@@ -578,10 +346,20 @@ class _PlantRegistrationFormState extends State<PlantRegistrationForm> {
           width: double.infinity,
           child: Consumer<PlantProvider>(
             builder: (context, plantProvider, child) {
-              return ElevatedButton(
+              return ElevatedButton.icon(
                 onPressed: plantProvider.isLoading ? null : () => _handleSubmit(context),
-                child: Text(
-                  '식물 등록하기',
+                icon: plantProvider.isLoading
+                    ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+                    : Icon(Icons.add),
+                label: Text(
+                  plantProvider.isLoading ? '등록 중...' : '식물 등록하기',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

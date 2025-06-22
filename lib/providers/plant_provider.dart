@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:math';
 
 import '../models/app_models.dart';
 import '../services/api_service.dart';
@@ -77,63 +76,6 @@ class PlantProvider extends ChangeNotifier {
       }
     } catch (e) {
       _setError('식물 등록 중 오류가 발생했습니다: $e');
-      return false;
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  // AI 식물 등록 (시뮬레이션)
-  Future<bool> registerPlantWithAI() async {
-    _setLoading(true);
-    _setError(null);
-
-    try {
-      // 시뮬레이션: 카메라 촬영 지연
-      await Future.delayed(Duration(seconds: 1));
-
-      if (_plantProfiles.isNotEmpty) {
-        PlantProfile randomProfile = _plantProfiles[Random().nextInt(_plantProfiles.length)];
-
-        // AI 인식 시뮬레이션
-        AIIdentificationResult mockResult = AIIdentificationResult(
-          species: randomProfile.species,
-          confidence: 0.75 + Random().nextDouble() * 0.2, // 75-95% 정확도
-          suggestedName: '내 ${randomProfile.commonName}',
-          optimalSettings: {
-            'optimalTempMin': randomProfile.optimalTempMin,
-            'optimalTempMax': randomProfile.optimalTempMax,
-            'optimalHumidityMin': randomProfile.optimalHumidityMin,
-            'optimalHumidityMax': randomProfile.optimalHumidityMax,
-            'optimalSoilMoistureMin': randomProfile.optimalSoilMoistureMin,
-            'optimalSoilMoistureMax': randomProfile.optimalSoilMoistureMax,
-            'optimalLightMin': randomProfile.optimalLightMin,
-            'optimalLightMax': randomProfile.optimalLightMax,
-          },
-        );
-
-        Plant aiRecognizedPlant = Plant(
-          id: '', // API에서 생성됨
-          name: mockResult.suggestedName,
-          species: mockResult.species,
-          registeredDate: DateTime.now().toString().split(' ')[0],
-          optimalTempMin: mockResult.optimalSettings['optimalTempMin']!,
-          optimalTempMax: mockResult.optimalSettings['optimalTempMax']!,
-          optimalHumidityMin: mockResult.optimalSettings['optimalHumidityMin']!,
-          optimalHumidityMax: mockResult.optimalSettings['optimalHumidityMax']!,
-          optimalSoilMoistureMin: mockResult.optimalSettings['optimalSoilMoistureMin']!,
-          optimalSoilMoistureMax: mockResult.optimalSettings['optimalSoilMoistureMax']!,
-          optimalLightMin: mockResult.optimalSettings['optimalLightMin']!,
-          optimalLightMax: mockResult.optimalSettings['optimalLightMax']!,
-        );
-
-        return await registerPlant(aiRecognizedPlant);
-      } else {
-        _setError('식물 프로파일을 먼저 로드해주세요.');
-        return false;
-      }
-    } catch (e) {
-      _setError('AI 인식에 실패했습니다: $e');
       return false;
     } finally {
       _setLoading(false);
@@ -297,11 +239,11 @@ class PlantProvider extends ChangeNotifier {
   Color getOverallStatusColor() {
     String status = getOverallStatus();
     switch (status) {
-      case '최적':
+      case '아주 좋아요':
         return Color(0xFF2E7D32);
-      case '양호':
+      case '건강해요':
         return Color(0xFF66BB6A);
-      case '주의 필요':
+      case '관심이 필요해요':
         return Color(0xFFE53E3E);
       default:
         return Color(0xFF999999);
@@ -328,9 +270,9 @@ class PlantProvider extends ChangeNotifier {
 
     List<String> types = ['warning', 'info', 'success', 'error'];
 
-    Random random = Random();
-    String message = demoMessages[random.nextInt(demoMessages.length)];
-    String type = types[random.nextInt(types.length)];
+    var random = DateTime.now().millisecondsSinceEpoch % 100;
+    String message = demoMessages[random % demoMessages.length];
+    String type = types[random % types.length];
 
     _notifications.insert(0, NotificationItem(
       id: _notifications.length + 1,

@@ -255,37 +255,3 @@ class PlantProfile {
     };
   }
 }
-
-class AIIdentificationResult {
-  String species;
-  double confidence;
-  String suggestedName;
-  Map<String, double> optimalSettings;
-
-  AIIdentificationResult({
-    required this.species,
-    required this.confidence,
-    required this.suggestedName,
-    required this.optimalSettings,
-  });
-
-  factory AIIdentificationResult.fromJson(Map<String, dynamic> json) {
-    return AIIdentificationResult(
-      species: json['species'] ?? '',
-      confidence: (json['confidence'] ?? 0).toDouble(),
-      suggestedName: json['suggestedName'] ?? '',
-      optimalSettings: Map<String, double>.from(
-        json['optimalSettings']?.map((key, value) => MapEntry(key, (value ?? 0).toDouble())) ?? {},
-      ),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'species': species,
-      'confidence': confidence,
-      'suggestedName': suggestedName,
-      'optimalSettings': optimalSettings,
-    };
-  }
-}
